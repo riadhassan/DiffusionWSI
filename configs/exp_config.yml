@@ -1,0 +1,43 @@
+---
+
+
+exp:  stainer_basic_cmp/exp3
+seed: 42
+
+loader:
+  norm_method: global_minmax
+  train_batch: 8
+  val_batch:   1
+  num_workers: 10
+  pin_memory:  true
+
+model:
+  name: ImageTranslationCNN
+
+loss:
+  name:
+
+optimizer:
+  name: AdamW
+  params:
+    lr:           0.001
+    betas:        [0.5, 0.9]
+    weight_decay: 0.05
+
+scheduler:
+  min_lr: 0.0
+  warmup: 50
+
+trainer:
+  epochs:     150
+  accum_iter: 1
+  diffaug:    false
+  ema:        true
+  low_weight: 1.0
+  apply_cmp:  true
+  start_cmp:  50
+  ckpt_freq:  1000
+  print_freq: 100
+
+
+...
