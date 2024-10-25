@@ -4,6 +4,7 @@ import math
 import torch
 
 from networks.wrapper import model_wrapper, loss_wrapper
+from Evaluation.metric import EvalMetrics
 
 
 class BCIBaseTrainer(object):
@@ -32,9 +33,6 @@ class BCIBaseTrainer(object):
         # model
         self.model_name = configs.model.name
         self.device   = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.D_input  = 'ihc' if configs.D.params.input_channels == 3 else 'he+ihc'
-        if self.apply_cmp:
-            self.C_params = configs.C
 
         # loss
         self.loss_name = configs.loss.name
@@ -70,7 +68,7 @@ class BCIBaseTrainer(object):
         #     self.cmp_loss = CmpLoss(**self.cmp_params).to(self.device)
         #     self.ccl_loss = ClsLoss(mode='focal', weight=1.0).to(self.device)
         #
-        # self.eval_metrics = EvalMetrics().to(self.device)
+        self.eval_metrics = EvalMetrics().to(self.device)
 
         self.loss = loss_wrapper(self.loss_name)
 
@@ -126,16 +124,9 @@ class BCIBaseTrainer(object):
 
         ckpt = {
             'epoch': epoch,
-            'D':     self.D.state_dict(),
-            'G':     self.G.state_dict(),
-            'D_opt': self.D_opt.state_dict(),
-            'G_opt': self.G_opt.state_dict(),
+            'state':     self.model.state_dict(),
+            'optm':     self.optimizer.state_dict(),
         }
-        if self.ema:
-            ckpt['Gema'] = self.Gema.state_dict()
-        if self.apply_cmp:
-            ckpt['C']     = self.C.state_dict()
-            ckpt['C_opt'] = self.C_opt.state_dict()
 
         torch.save(ckpt, ckpt_path)
 
@@ -171,7 +162,7 @@ class BCIBaseTrainer(object):
                 (self.opt_params.lr - self.min_lr) * 0.5 * \
                 (1.0 + math.cos(math.pi * epoch_ratio))
 
-        optimizers = [self.G_opt, self.D_opt]
+        optimizers = [self.optimizer]
         for optimizer in optimizers:
             for param_group in optimizer.param_groups:
                 if 'lr_scale' in param_group:

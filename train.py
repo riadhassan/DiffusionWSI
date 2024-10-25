@@ -1,9 +1,11 @@
 import os
 import argparse
-
 from utils.utils import *
 from DataLoader.data_loader import get_dataloader
 from omegaconf import OmegaConf
+from trainer.demo_trainer import DemoTrainer
+
+
 
 
 def main(args):
@@ -30,7 +32,7 @@ def main(args):
         val_loader   = get_dataloader('val',   args.val_dir,   configs.loader)
 
         # initialize trainer
-        trainer = BCITrainerBasic(configs, exp_dir, args.resume_ckpt)
+        trainer = DemoTrainer(configs, exp_dir, args.resume_ckpt)
 
     # elif args.trainer == 'cahr':
     #     # loads dataloder for training and validation
@@ -50,10 +52,10 @@ def main(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Training for BCI Dataset')
-    parser.add_argument('--train_dir',   type=str, help='dir path of training data')
-    parser.add_argument('--val_dir',     type=str, help='dir path of validation data')
+    parser.add_argument('--train_dir',   type=str, default="data\\train", help='dir path of training data')
+    parser.add_argument('--val_dir',     type=str, default="data\\val", help='dir path of validation data')
     parser.add_argument('--exp_root',    type=str, help='root dir of experiment', default="experiment")
-    parser.add_argument('--config_file', type=str, help='yaml path of configs')
+    parser.add_argument('--config_file', type=str, default="configs\\exp_config.yml", help='yaml path of configs')
     parser.add_argument('--resume_ckpt', type=str, help='checkpoint path for resuming')
     parser.add_argument('--trainer',     type=str, help='trainer type, basic or cahr', default='basic')
     args = parser.parse_args()

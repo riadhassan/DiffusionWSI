@@ -6,12 +6,13 @@ import numpy as np
 
 from utils.base import *
 from utils.logger import *
+from networks.wrapper import model_wrapper, loss_wrapper
 
 
-class BCITrainerBasic(BCIBaseTrainer):
+class DemoTrainer(BCIBaseTrainer):
 
     def __init__(self, configs, exp_dir, resume_ckpt):
-        super(BCITrainerBasic, self).__init__(configs, exp_dir, resume_ckpt)
+        super(DemoTrainer, self).__init__(configs, exp_dir, resume_ckpt)
 
     def forward(self, train_loader, val_loader):
 
@@ -24,7 +25,7 @@ class BCITrainerBasic(BCIBaseTrainer):
             train_metrics = self._train_epoch(train_loader, epoch)
 
             # save model with best val psnr
-            val_model = self.Gema if self.ema else self.G
+            val_model = self.model
             val_metrics = self._val_epoch(val_model, val_loader, epoch)
             psnr = val_metrics['psnr']
             ssim = val_metrics['ssim']
@@ -71,20 +72,12 @@ class BCITrainerBasic(BCIBaseTrainer):
 
             # forward
             he, ihc, level = [d.to(self.device) for d in data]
-            outputs = self.model(he)
-            ihc_phr, ihc_plr, he_plevel = outputs
+            ihc_phr = self.model(he)
+            print(ihc_phr.shape)
 
-            # update G
-            self._set_requires_grad(self.D, False)
-            Ggan, Grec, Gsim = self._G_loss(he, ihc, ihc_phr, ihc_plr)
-            Gcls = self.gcl_loss(he_plevel, level)
-            logger.update(Gg=Ggan.item(), Gr=Grec.item(),
-                          Gs=Gsim.item(), Gc=Gcls.item())
-            lossG = self.loss(ihc, ihc_phr)
-
-
-
-
+            loss = self.loss(ihc, ihc_phr)
+            loss.backward()
+            self.optimizer.step()
 
         logger_info = {
             key: meter.global_avg
@@ -102,17 +95,12 @@ class BCITrainerBasic(BCIBaseTrainer):
         data_iter = logger.log_every(loader)
         for _, data in enumerate(data_iter):
             he, ihc, level = [d.to(self.device) for d in data]
-            outputs = val_model(he)
-            ihc_phr = outputs[0]
+            ihc_phr = val_model(he)
+
+            print(ihc_phr.shape)
 
             psnr, ssim = self.eval_metrics(ihc_phr, ihc)
             logger.update(psnr=psnr.item(), ssim=ssim.item())
-
-            if self.apply_cmp:
-                self.C.eval()
-                ihc_plevel, ihc_platent = self.C(ihc_phr)
-                clsf = self.ccl_loss(ihc_plevel, level)
-                logger.update(clsf=clsf.item())
 
         logger_info = {
             key: meter.global_avg
