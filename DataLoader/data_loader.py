@@ -5,6 +5,7 @@ import numpy as np
 import imageio.v2 as iio
 import albumentations as A
 import matplotlib.pyplot as plt
+import cv2
 
 from os.path import join as opj
 from utils.utils import normalize_image
@@ -86,9 +87,11 @@ class BCIBasicDataset(Dataset):
             # plt.axis('off')
             # plt.tight_layout()
             # plt.show()
-
+        he = cv2.resize(he, (512, 512), interpolation=cv2.INTER_LINEAR)
         he  = normalize_image(he, 'he', self.norm_method)
         he  = he.transpose(2, 0, 1).astype(np.float32)
+
+        ihc = cv2.resize(ihc, (512, 512), interpolation=cv2.INTER_LINEAR)
         ihc = normalize_image(ihc, 'ihc', self.norm_method)
         ihc = ihc.transpose(2, 0, 1).astype(np.float32)
 

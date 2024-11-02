@@ -9,6 +9,7 @@ from utils.logger import *
 from networks.wrapper import model_wrapper, loss_wrapper
 
 
+
 class DemoTrainer(BCIBaseTrainer):
 
     def __init__(self, configs, exp_dir, resume_ckpt):
@@ -72,12 +73,33 @@ class DemoTrainer(BCIBaseTrainer):
 
             # forward
             he, ihc, level = [d.to(self.device) for d in data]
-            ihc_phr = self.model(he)
-            print(ihc_phr.shape)
+            ihc_phr, first_layer_f, before_koopman_f, koopman_f, last_layer_f = self.model(he)
 
             loss = self.loss(ihc, ihc_phr)
             loss.backward()
             self.optimizer.step()
+
+            self.step += 1
+            if iter_step % 5 == 0:
+                first_layer_f = first_layer_f.clone()
+                first_layer_f = first_layer_f.data.cpu().numpy().squeeze()
+                first_layer_f = (first_layer_f - first_layer_f.min()) / (first_layer_f.max() - first_layer_f.min() + 1e-8)
+                self.writer.add_image('First_layer', torch.tensor(first_layer_f), iter_step, dataformats='HW')
+
+                before_koopman_f = before_koopman_f.clone()
+                before_koopman_f = before_koopman_f.data.cpu().numpy().squeeze()
+                before_koopman_f = (before_koopman_f - before_koopman_f.min()) / (before_koopman_f.max() - before_koopman_f.min() + 1e-8)
+                self.writer.add_image('before_koopman', torch.tensor(before_koopman_f), iter_step, dataformats='HW')
+
+                koopman_f = koopman_f.clone()
+                koopman_f = koopman_f.data.cpu().numpy().squeeze()
+                koopman_f = (koopman_f - koopman_f.min()) / (koopman_f.max() - koopman_f.min() + 1e-8)
+                self.writer.add_image('after_Koopman', torch.tensor(koopman_f), iter_step, dataformats='HW')
+
+                last_layer_f = last_layer_f.clone()
+                last_layer_f = last_layer_f.data.cpu().numpy().squeeze()
+                last_layer_f = (last_layer_f - last_layer_f.min()) / (last_layer_f.max() - last_layer_f.min() + 1e-8)
+                self.writer.add_image('Last_layer', torch.tensor(last_layer_f), iter_step, dataformats='HW')
 
         logger_info = {
             key: meter.global_avg
@@ -93,11 +115,9 @@ class DemoTrainer(BCIBaseTrainer):
         logger = MetricLogger(header, self.print_freq)
 
         data_iter = logger.log_every(loader)
-        for _, data in enumerate(data_iter):
+        for step, data in enumerate(data_iter):
             he, ihc, level = [d.to(self.device) for d in data]
-            ihc_phr = val_model(he)
-
-            print(ihc_phr.shape)
+            ihc_phr, first_layer_f, before_koopman_f, koopman_f, last_layer_f = val_model(he)
 
             psnr, ssim = self.eval_metrics(ihc_phr, ihc)
             logger.update(psnr=psnr.item(), ssim=ssim.item())

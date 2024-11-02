@@ -1,6 +1,6 @@
 import torch.nn as nn
 from networks.demo_net import ImageTranslationCNN
-
+from networks.koopman_network import KoopmanUNet
 def model_wrapper(model_name):
     # in_channel = 1
     # if (conf.dataset == "LCTSC"):
@@ -10,6 +10,7 @@ def model_wrapper(model_name):
 
     architecture = {
         "ImageTranslationCNN": ImageTranslationCNN(),
+        "KoopmanUNet": KoopmanUNet(n_channels=3, n_classes=3),
     }
 
     model = architecture[model_name]
@@ -21,7 +22,9 @@ def loss_wrapper(loss_name):
     loss_function  = {
         "MSE": nn.MSELoss(),
     }
-
-    criterion = loss_function[loss_name]
+    try:
+        criterion = loss_function[loss_name]
+    except:
+        criterion = nn.MSELoss()
 
     return criterion

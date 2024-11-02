@@ -40,7 +40,7 @@ if __name__ == "__main__":
     model = ImageTranslationCNN()
 
     # Example input: a batch of 32x32 RGB images (batch size of 8)
-    dummy_input = torch.randn(8, 3, 32, 32)  # Random noise as input
+    dummy_input = torch.randn(8, 3, 512, 512)  # Random noise as input
     output = model(dummy_input)
 
     # Print the output shape to verify the network works

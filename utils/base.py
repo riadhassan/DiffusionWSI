@@ -5,6 +5,7 @@ import torch
 
 from networks.wrapper import model_wrapper, loss_wrapper
 from Evaluation.metric import EvalMetrics
+from tensorboardX import SummaryWriter
 
 
 class BCIBaseTrainer(object):
@@ -14,7 +15,9 @@ class BCIBaseTrainer(object):
         self.configs  = configs
         self.exp_dir  = exp_dir
         self.ckpt_dir = os.path.join(self.exp_dir, 'ckpts')
+        self.tensorboard_dir = os.path.join(self.exp_dir, 'summary')
         os.makedirs(self.ckpt_dir, exist_ok=True)
+        os.makedirs(self.tensorboard_dir, exist_ok=True)
         self.log_path = os.path.join(self.exp_dir, 'log.txt')
         self.resume_ckpt = resume_ckpt
 
@@ -49,6 +52,10 @@ class BCIBaseTrainer(object):
         self._load_losses()
         self._load_optimizer()
         self._load_checkpoint()
+
+        #tensorboard writter
+        self.writer = SummaryWriter(self.tensorboard_dir)
+        self.step = 0
 
     def _load_model(self):
 
