@@ -7,6 +7,7 @@ import numpy as np
 from utils.base import *
 from utils.logger import *
 from networks.wrapper import model_wrapper, loss_wrapper
+from torchvision.utils import make_grid
 
 
 
@@ -80,7 +81,14 @@ class DemoTrainer(BCIBaseTrainer):
             self.optimizer.step()
 
             self.step += 1
-            if iter_step % 5 == 0:
+            if iter_step % 300 == 0:
+                grid_image = make_grid(he[0].clone().cpu().data, 1, normalize=True)
+                self.writer.add_image('HE', grid_image, iter_step)
+                grid_image = make_grid(ihc[0].clone().cpu().data, 1, normalize=True)
+                self.writer.add_image('GT_IHC', grid_image, iter_step)
+                grid_image = make_grid(ihc_phr[0].clone().cpu().data, 1, normalize=True)
+                self.writer.add_image('Predicted_IHC', grid_image, iter_step)
+
                 first_layer_f = first_layer_f.clone()
                 first_layer_f = first_layer_f.data.cpu().numpy().squeeze()
                 first_layer_f = (first_layer_f - first_layer_f.min()) / (first_layer_f.max() - first_layer_f.min() + 1e-8)

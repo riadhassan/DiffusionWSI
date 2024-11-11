@@ -60,7 +60,6 @@ class MetricLogger(object):
         self.meters = defaultdict(SmoothedValue)
         self.delimiter = delimiter
         self.print_freq = print_freq
-
     def update(self, **kwargs):
         for k, v in kwargs.items():
             if v is None:

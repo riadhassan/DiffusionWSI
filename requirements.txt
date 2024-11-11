@@ -1,4 +1,3 @@
-torch==2.1.2
 numpy==1.24.4
 imageio==2.35.1
 albumentations==1.4.18

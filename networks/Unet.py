@@ -8,27 +8,7 @@ def gaussian_init_(n_units, std=1):
     Omega = sampler.sample((n_units, n_units))[..., 0]
     return Omega
 # Define Koopman Layer
-class KoopmanLayer(nn.Module):
-    def __init__(self, in_channels, hidden_dim):
-        super(KoopmanLayer, self).__init__()
-        # Learn linear transformations (approximating Koopman operator)
-        self.fc1 = nn.Linear(in_channels, in_channels, bias=False)
-        # self.fc2 = nn.Linear(hidden_dim, in_channels, bias=False)
-        self.fc1.weight.data = gaussian_init_(n_units=in_channels)
-        U, _, V = torch.svd(self.fc1.weight.data)
-        self.fc1.weight.data = torch.mm(U, V.t())
 
-
-    def forward(self, x):
-        batch_size, num_channels, height, width = x.size()
-        x = x.view(batch_size, num_channels, -1)  # Flatten spatial dimensions
-        # x = F.relu(self.fc1(x))  # Nonlinear transformation
-        x = self.fc1(x)  # Linear Koopman operator approximation
-        x = x.view(batch_size, num_channels, height, width)
-        return x
-
-
-# Define U-Net Building Blocks
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DoubleConv, self).__init__()
@@ -82,9 +62,9 @@ class OutConv(nn.Module):
 
 
 # Define Koopman-Enhanced U-Net
-class KoopmanUNet(nn.Module):
+class UNet(nn.Module):
     def __init__(self, n_channels, n_classes, hidden_dim=128):
-        super(KoopmanUNet, self).__init__()
+        super(UNet, self).__init__()
         self.in_conv = DoubleConv(n_channels, 64)
         self.down1 = Down(64, 128)
         self.down2 = Down(128, 256)
@@ -92,7 +72,6 @@ class KoopmanUNet(nn.Module):
         self.down4 = Down(512, 1024)
 
         # Integrate Koopman Layer here for transformation
-        self.koopman_layer = KoopmanLayer(1024, hidden_dim)
 
         # self.down4 = Down(512, 512)
         self.up1 = Up(1024, 512)
@@ -109,11 +88,8 @@ class KoopmanUNet(nn.Module):
         x4 = self.down3(x3)
         x5 = self.down4(x4)
 
-        # Apply Koopman Layer transformation on the bottleneck features
-        k = self.koopman_layer(x5)
-
-        x = self.up1(k, x4)
-        x = self.up2(x, x3)
+        k = self.up1(x5, x4)
+        x = self.up2(k, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         logits = self.softmax(self.out_conv(x))

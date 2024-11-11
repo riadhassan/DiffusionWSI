@@ -52,8 +52,8 @@ def main(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Training for BCI Dataset')
-    parser.add_argument('--train_dir',   type=str, default="data\\train", help='dir path of training data')
-    parser.add_argument('--val_dir',     type=str, default="data\\val", help='dir path of validation data')
+    parser.add_argument('--train_dir',   type=str, default="data\\actual\\train", help='dir path of training data')
+    parser.add_argument('--val_dir',     type=str, default="data\\actual\\val", help='dir path of validation data')
     parser.add_argument('--exp_root',    type=str, help='root dir of experiment', default="experiment")
     parser.add_argument('--config_file', type=str, default="configs\\exp_config.yml", help='yaml path of configs')
     parser.add_argument('--resume_ckpt', type=str, help='checkpoint path for resuming')
