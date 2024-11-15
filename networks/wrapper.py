@@ -1,6 +1,6 @@
 import torch.nn as nn
 from networks.demo_net import ImageTranslationCNN
-from networks.koopman_network import KoopmanUNet
+from networks.koopman_network import UNet_koopman
 from networks.Unet import UNet
 def model_wrapper(model_name):
     # in_channel = 1
@@ -11,8 +11,8 @@ def model_wrapper(model_name):
 
     architecture = {
         "ImageTranslationCNN": ImageTranslationCNN(),
-        "KoopmanUNet": KoopmanUNet(n_channels=3, n_classes=3),
-        "UNet": UNet(n_channels=3, n_classes=3),
+        "KoopmanUNet": UNet_koopman(in_channels=3, out_channels=3),
+        "UNet": UNet(in_channels=3, out_channels=3),
     }
 
     model = architecture[model_name]
