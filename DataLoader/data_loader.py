@@ -91,7 +91,7 @@ class BCIBasicDataset(Dataset):
         he  = normalize_image(he, 'he', self.norm_method)
         he  = he.transpose(2, 0, 1).astype(np.float32)
 
-        ihc = cv2.resize(ihc, (512, 512), interpolation=cv2.INTER_LINEAR)
+        ihc = cv2.resize(ihc, (256, 256), interpolation=cv2.INTER_LINEAR)
         ihc = normalize_image(ihc, 'ihc', self.norm_method)
         ihc = ihc.transpose(2, 0, 1).astype(np.float32)
 

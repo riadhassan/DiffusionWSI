@@ -306,6 +306,6 @@ if __name__ == "__main__":
 
     # Example input tensor (batch size, channels, height, width)
     input_tensor = torch.randn(3, 3, 256, 256).to(device)
-    output = model(input_tensor)
+    output, _, _, _, _ = model(input_tensor)
 
     print("Output shape:", output.shape)

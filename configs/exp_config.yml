@@ -1,7 +1,7 @@
 ---
 
 
-exp:  stainer_basic_cmp/exp_Unet
+exp:  stainer_basic_cmp/KoopmanUNet_CA_GA
 seed: 42
 
 loader:
@@ -12,7 +12,7 @@ loader:
   pin_memory:  true
 
 model:
-  name: UNet
+  name: KoopmanUNet
 
 loss:
   name: MSE

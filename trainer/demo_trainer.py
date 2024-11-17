@@ -92,22 +92,22 @@ class DemoTrainer(BCIBaseTrainer):
                 first_layer_f = first_layer_f.clone()
                 first_layer_f = first_layer_f.data.cpu().numpy().squeeze()
                 first_layer_f = (first_layer_f - first_layer_f.min()) / (first_layer_f.max() - first_layer_f.min() + 1e-8)
-                self.writer.add_image('First_layer', torch.tensor(first_layer_f), iter_step, dataformats='HW')
+                self.writer.add_image('First_layer', torch.tensor(first_layer_f), iter_step, dataformats='CHW')
 
                 before_koopman_f = before_koopman_f.clone()
                 before_koopman_f = before_koopman_f.data.cpu().numpy().squeeze()
                 before_koopman_f = (before_koopman_f - before_koopman_f.min()) / (before_koopman_f.max() - before_koopman_f.min() + 1e-8)
-                self.writer.add_image('before_koopman', torch.tensor(before_koopman_f), iter_step, dataformats='HW')
+                self.writer.add_image('before_koopman', torch.tensor(before_koopman_f), iter_step, dataformats='CHW')
 
                 koopman_f = koopman_f.clone()
                 koopman_f = koopman_f.data.cpu().numpy().squeeze()
                 koopman_f = (koopman_f - koopman_f.min()) / (koopman_f.max() - koopman_f.min() + 1e-8)
-                self.writer.add_image('after_Koopman', torch.tensor(koopman_f), iter_step, dataformats='HW')
+                self.writer.add_image('after_Koopman', torch.tensor(koopman_f), iter_step, dataformats='CHW')
 
                 last_layer_f = last_layer_f.clone()
                 last_layer_f = last_layer_f.data.cpu().numpy().squeeze()
                 last_layer_f = (last_layer_f - last_layer_f.min()) / (last_layer_f.max() - last_layer_f.min() + 1e-8)
-                self.writer.add_image('Last_layer', torch.tensor(last_layer_f), iter_step, dataformats='HW')
+                self.writer.add_image('Last_layer', torch.tensor(last_layer_f), iter_step, dataformats='CHW')
 
         logger_info = {
             key: meter.global_avg
